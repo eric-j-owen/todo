@@ -4,7 +4,7 @@ import { ITodo } from "../types";
 const todoSchema = new Schema<ITodo>(
   {
     task: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String },
     completed: { type: Boolean, required: true },
   },
   {

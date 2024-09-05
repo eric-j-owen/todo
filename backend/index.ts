@@ -16,28 +16,31 @@ app.use(cors({ origin }));
 
 //routes
 app.get("/todo", async (req: Request, res: Response) => {
-  const todos = await Todo.find({});
-  return res.status(200).send({
-    length: todos.length,
-    data: todos,
-  });
+  try {
+    const todos = await Todo.find({});
+    return res.status(200).json({
+      length: todos.length,
+      data: todos,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err });
+  }
 });
 
 app.post("/todo", async (req: Request, res: Response) => {
   try {
     const todo: ITodo = {
       task: req.body.task,
-
+      description: req.body.description,
       completed: false,
     };
     await Todo.create(todo);
-    return res.status(201).send("Success");
+    return res.status(201).json({ message: "Record created" });
   } catch (err) {
-    console.log(err.name);
-    if (err.name === "ValidatorError") {
-      return res.status(400).send({ message: err.message });
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ error: err.message });
     }
-    return res.status(500).send({ message: err });
+    return res.status(500).json({ error: err });
   }
 });
 
