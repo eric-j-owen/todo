@@ -30,6 +30,40 @@ class TodoController {
       res.json({ error: err });
     }
   };
+
+  public editTodo: RequestHandler = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { task, description, completed }: ITodo = req.body;
+      if (
+        task === undefined ||
+        description === undefined ||
+        completed === undefined
+      )
+        return res.status(400).json({ error: "Missing fields" });
+      await Todo.findByIdAndUpdate(id, req.body);
+      res.status(200).send({ message: "Record updated succesfully" });
+    } catch (err) {
+      if (err.name === "CastError") res.status(400);
+      else res.status(500);
+      res.json({ error: err });
+    }
+  };
+
+  public deleteTodo: RequestHandler = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const todo = await Todo.findByIdAndDelete(id);
+
+      res
+        .status(200)
+        .json({ Message: `Task '${todo.task}' deleted successfully` });
+    } catch (err) {
+      if (err.name === "CastError")
+        return res.status(404).send(`Todo not found`);
+      res.status(500).send(err);
+    }
+  };
 }
 
 export const todoController = new TodoController();
