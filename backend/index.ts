@@ -1,48 +1,20 @@
 import "dotenv/config";
-import express, { Request, Response } from "express";
+import express, { type Express } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { Todo } from "./models/todo.model.ts";
-import { ITodo } from "./types";
+import todoRouter from "./src/api/todo/todo.route.ts";
 
-const app = express();
-const port = process.env.PORT;
-const uri = process.env.MONGO_URI;
-const origin = process.env.FRONTEND_ORIGIN;
+const app: Express = express();
+const port: string = process.env.PORT;
+const uri: string = process.env.MONGO_URI;
+const origin: string = process.env.FRONTEND_ORIGIN;
 
 //middleware
 app.use(express.json());
 app.use(cors({ origin }));
 
 //routes
-app.get("/todo", async (req: Request, res: Response) => {
-  try {
-    const todos = await Todo.find({});
-    return res.status(200).json({
-      length: todos.length,
-      data: todos,
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err });
-  }
-});
-
-app.post("/todo", async (req: Request, res: Response) => {
-  try {
-    const todo: ITodo = {
-      task: req.body.task,
-      description: req.body.description,
-      completed: false,
-    };
-    await Todo.create(todo);
-    return res.status(201).json({ message: "Record created" });
-  } catch (err) {
-    if (err.name === "ValidationError") {
-      return res.status(400).json({ error: err.message });
-    }
-    return res.status(500).json({ error: err });
-  }
-});
+app.use("/todo", todoRouter);
 
 //db connection
 mongoose
